@@ -1,0 +1,11 @@
+{
+  "Hero": {
+    "badge": "Elite Structural Engineering",
+    "title": "Structural Integrity Meets Absolute Precision",
+    "subtitle": "Access cryptographic, secure building analysis reports and structural health audits for premium regional estates.",
+    "searchPlaceholder": "Enter unique building ID or estate name...",
+    "verifyButton": "Verify Portal",
+    "pinPlaceholder": "Enter 6-digit PIN",
+    "downloadReport": "Access Secure Document"
+  }
+}

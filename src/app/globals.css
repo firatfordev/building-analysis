@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+/* 1. Global CSS Variables */
+:root {
+  --background: #0B0F17; /* Defaulting the app to the deep luxury obsidian */
+  --foreground: #F1F5F9; /* Clean slate text color */
+}
+
+/* 2. Tailwind v4 Theme Extension Configuration */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Premium Luxury Brand System Colors */
+  --color-luxury-950: #0B0F17;       /* Deep Obsidian */
+  --color-luxury-900: #111827;       /* Rich Charcoal */
+  --color-luxury-800: #1F2937;       /* Industrial Gray */
+  --color-luxury-gold: #C5A880;      /* Muted Metallic Gold */
+  --color-luxury-platinum: #E5E7EB;  /* Light Premium Contrast */
+
+  /* Utility Animations for Smooth Interactive State UI Transitions */
+  --animate-fadeIn: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* 3. Base Document Element Styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--background);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom styling to ensure the interactive input text field matches the premium look */
+  input[type="password"] {
+    font-family: inherit;
+  }
+}

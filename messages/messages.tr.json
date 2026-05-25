@@ -1,0 +1,11 @@
+{
+  "Hero": {
+    "badge": "Seçkin Yapı Mühendisliği",
+    "title": "Yapısal Güvenilirlik ve Mutlak Hassasiyet",
+    "subtitle": "Birinci sınıf bölgesel mülkler için kriptografik korumalı, güvenli bina analiz raporlarına ve yapı sağlığı denetimlerine erişin.",
+    "searchPlaceholder": "Benzersiz bina kimliği veya mülk adı girin...",
+    "verifyButton": "Portalı Doğrula",
+    "pinPlaceholder": "6 haneli PIN kodunu girin",
+    "downloadReport": "Güvenli Belgeye Erişin"
+  }
+}
