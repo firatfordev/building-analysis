@@ -1,0 +1,36 @@
+{
+  "name": "AURA Analytics — Certified Structural Analysis",
+  "short_name": "AURA",
+  "description": "Independent, lab-verified structural analysis for properties in the Aegean region. ISO 9001 · Eurocode 8 certified.",
+  "start_url": "/en",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["business", "utilities"],
+  "icons": [
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple touch icon"
+    },
+    {
+      "src": "/icon",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/opengraph-image",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "label": "AURA Analytics — Building Analysis Platform"
+    }
+  ]
+}

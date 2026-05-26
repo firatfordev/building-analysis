@@ -12,6 +12,7 @@ import {
   CheckCircle, Download, FileText, Leaf, Building, Building2,
   ChevronDown, CreditCard, Play, Mail, Phone, Globe,
   Loader2, AlertCircle, X, Clock,
+  Menu, ChevronRight,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -56,7 +57,11 @@ export default function UltimateLuxuryBento() {
   const tContact= useTranslations('Contact');
   const tFooter = useTranslations('Footer');
 
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [openFaq,     setOpenFaq]     = useState<number | null>(0);
+  const [mobileOpen,  setMobileOpen]  = useState(false);
+  const [isSample,       setIsSample]       = useState(false);
+  const [sampleLoading,  setSampleLoading]  = useState(false);
+  const [sampleError,    setSampleError]    = useState<string | null>(null);
 
   // ── Search state ─────────────────────────────────────────────────────────────
   const [searchTerm,       setSearchTerm]       = useState('');
@@ -136,6 +141,28 @@ export default function UltimateLuxuryBento() {
     setStep('search'); setSearchTerm(''); setSearchResults([]);
     setSelectedBuilding(null); setPin(''); setPinError(null);
     setSearchError(null); setUnlockedBuilding(null);
+    setIsSample(false); setSampleError(null);
+  };
+
+  // ── Sample demo handler ───────────────────────────────────────────────────
+  const handleSampleClick = async () => {
+    setSampleLoading(true); setSampleError(null);
+    try {
+      const res  = await fetch('/api/public/sample');
+      const json = await res.json();
+      if (!res.ok || !json.sample?.available) {
+        setSampleError(tHero('sampleUnavailable'));
+        return;
+      }
+      const { title, description, pdfUrl } = json.sample;
+      setUnlockedBuilding({ id: 0, name: title, uid: 'DEMO', description, imageUrl: null, pdfUrl });
+      setIsSample(true);
+      setStep('unlocked');
+    } catch {
+      setSampleError(tHero('sampleError'));
+    } finally {
+      setSampleLoading(false);
+    }
   };
 
   const faqs = [
@@ -191,31 +218,96 @@ export default function UltimateLuxuryBento() {
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
+      {/* ── Mobile backdrop ── */}
+      {mobileOpen && (
+        <div
+          aria-hidden
+          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden"
+        />
+      )}
 
       {/* --- ELITE HEADER --- */}
-      <header className="relative z-50 w-full pt-8 px-6 md:px-12">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between bg-white/95 border border-slate-100 backdrop-blur-2xl rounded-[2rem] px-8 py-5 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.03)]">
-          <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2 rounded-xl shadow-[0_4px_12px_rgba(37,99,235,0.2)]">
-                <Activity className="h-5 w-5 text-white stroke-[2.5]" />
+      <header className="relative z-50 w-full pt-8 px-4 md:px-12">
+        <div className="max-w-[1600px] mx-auto">
+
+          {/* Pill */}
+          <div className="flex items-center justify-between bg-white/95 border border-slate-100 backdrop-blur-2xl rounded-[2rem] px-5 md:px-8 py-4 md:py-5 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.03)]">
+
+            {/* Logo */}
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2 rounded-xl shadow-[0_4px_12px_rgba(37,99,235,0.2)] shrink-0">
+                <Activity className="h-4 w-4 text-white stroke-[2.5]" />
+              </div>
+              <span className="hidden sm:block font-bold tracking-[0.3em] text-xs uppercase text-slate-900">
+                AURA <span className="text-blue-600 font-light">ANALYTICS</span>
+              </span>
+              <span className="block sm:hidden font-bold tracking-[0.2em] text-xs uppercase text-slate-900">
+                AURA
+              </span>
             </div>
-            <span className="font-bold tracking-[0.3em] text-xs uppercase text-slate-900">
-              AURA <span className="text-blue-600 font-light">ANALYTICS</span>
-            </span>
+
+            {/* Desktop nav */}
+            <nav className="hidden lg:flex items-center gap-10 text-[10px] tracking-[0.25em] text-slate-500 uppercase font-bold">
+              <Link href={`/${locale}/about`}      className="hover:text-blue-600 transition-colors">{tHeader('about')}</Link>
+              <Link href={`/${locale}/projects`}   className="hover:text-blue-600 transition-colors">{tHeader('projects')}</Link>
+              <Link href={`/${locale}/procedures`} className="hover:text-blue-600 transition-colors">{tHeader('procedures')}</Link>
+              <Link href={`/${locale}/contact`}    className="hover:text-blue-600 transition-colors">{tHeader('contact')}</Link>
+              <Link href={adminHref} className="bg-slate-900 text-white px-8 py-3.5 rounded-full hover:bg-blue-700 transition-colors duration-300 text-[10px] font-bold uppercase tracking-widest shadow-md ml-2">
+                {tHeader('adminPortal')}
+              </Link>
+            </nav>
+
+            {/* Mobile hamburger (below lg) */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(v => !v)}
+              aria-expanded={mobileOpen}
+              aria-label="Toggle menu"
+              className="flex lg:hidden items-center justify-center w-10 h-10 rounded-xl bg-slate-900 text-white hover:bg-blue-700 active:scale-95 transition-all shrink-0"
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
           </div>
-          <nav className="hidden lg:flex items-center gap-12 text-[10px] tracking-[0.25em] text-slate-500 uppercase font-bold">
-            <a href="#" className="hover:text-blue-600 transition-colors">{tHeader('labTelemetry')}</a>
-            <a href="#" className="hover:text-blue-600 transition-colors">{tHeader('eurocodeStandard')}</a>
-            <Link href={adminHref} className="bg-slate-900 text-white px-8 py-3.5 rounded-full hover:bg-blue-700 transition-colors duration-300 text-[10px] font-bold uppercase tracking-widest shadow-md">
-               {tHeader('adminPortal')}
-            </Link>
-          </nav>
+
+          {/* Mobile dropdown panel */}
+          <div
+            className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+              mobileOpen ? 'max-h-[24rem] opacity-100 mt-2' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <div className="bg-white border border-slate-200 rounded-[1.75rem] shadow-xl overflow-hidden">
+              <nav className="flex flex-col divide-y divide-slate-50">
+                {[
+                  { href: `/${locale}/about`,      label: tHeader('about')      },
+                  { href: `/${locale}/projects`,   label: tHeader('projects')   },
+                  { href: `/${locale}/procedures`, label: tHeader('procedures') },
+                  { href: `/${locale}/contact`,    label: tHeader('contact')    },
+                ].map(link => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between px-6 py-4 text-xs font-bold uppercase tracking-[0.18em] text-slate-600 hover:text-slate-900 hover:bg-slate-50 active:bg-slate-100 transition-colors"
+                  >
+                    <span>{link.label}</span>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                  </Link>
+                ))}
+              </nav>
+              <div className="p-4 bg-slate-50 border-t border-slate-100">
+                <Link
+                  href={adminHref}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center w-full bg-slate-900 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.25em] hover:bg-blue-700 active:scale-[0.98] transition-all duration-200"
+                >
+                  {tHeader('adminPortal')}
+                </Link>
+              </div>
+            </div>
+          </div>
+
         </div>
       </header>
 
@@ -238,6 +330,25 @@ export default function UltimateLuxuryBento() {
             {tHero('subtitle')}
           </p>
 
+          {/* ── Sample demo button ── */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <button
+              type="button"
+              onClick={handleSampleClick}
+              disabled={sampleLoading}
+              className="flex items-center gap-2.5 px-5 py-2.5 bg-white/80 backdrop-blur-md border border-blue-100 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-blue-700 hover:bg-blue-50 hover:border-blue-200 active:scale-[0.98] transition-all duration-200 shadow-sm disabled:opacity-60 group"
+            >
+              {sampleLoading
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                : <Microscope className="w-3.5 h-3.5 text-blue-600 group-hover:scale-110 transition-transform" />}
+              {tHero('sampleButton')}
+              {!sampleLoading && <ArrowRight className="w-3 h-3 text-blue-500" />}
+            </button>
+            {sampleError && (
+              <span className="text-[9px] text-red-500 font-medium">{sampleError}</span>
+            )}
+          </div>
+
           {/* Flat, Elegant Search Console */}
           <div className="w-full max-w-2xl bg-white/95 backdrop-blur-2xl border border-slate-100 rounded-[2.5rem] p-3 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] relative transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(37,99,235,0.08)]">
 
@@ -246,15 +357,17 @@ export default function UltimateLuxuryBento() {
               <div className="p-5 flex flex-col gap-5">
                 {/* Header */}
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-inner">
-                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 shadow-inner ${isSample ? 'bg-blue-100' : 'bg-emerald-100'}`}>
+                    {isSample
+                      ? <Microscope className="w-5 h-5 text-blue-600" />
+                      : <CheckCircle className="w-5 h-5 text-emerald-600" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-3 mb-1 flex-wrap">
-                      <p className="text-[8px] font-black text-emerald-600 uppercase tracking-[0.3em]">
-                        {tSearch('vaultUnlocked')}
-                      </p>
-                      <span className="bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full font-mono text-[8px] text-slate-600 font-bold shrink-0">
+                      {isSample
+                        ? <p className="text-[8px] font-black text-blue-600 uppercase tracking-[0.3em]">{tSearch('sampleDemo')}</p>
+                        : <p className="text-[8px] font-black text-emerald-600 uppercase tracking-[0.3em]">{tSearch('vaultUnlocked')}</p>}
+                      <span className={`px-2.5 py-1 rounded-full font-mono text-[8px] font-bold shrink-0 ${isSample ? 'bg-blue-50 border border-blue-200 text-blue-700' : 'bg-slate-100 border border-slate-200 text-slate-600'}`}>
                         {unlockedBuilding.uid}
                       </span>
                     </div>
@@ -483,19 +596,23 @@ export default function UltimateLuxuryBento() {
 
           {/* Glassmorphic Telemetry Widget */}
           <div className="absolute top-12 left-0 bg-white/70 backdrop-blur-3xl border border-white p-5 rounded-[2rem] shadow-[0_20px_40px_rgba(37,99,235,0.1)] z-30 w-[260px] transition-shadow duration-500 hover:shadow-[0_30px_50px_rgba(37,99,235,0.15)]">
-             <div className="flex items-center gap-3 mb-5">
-                 <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
-                     <Activity className="w-4 h-4 text-blue-600" />
+             <div className="flex items-center gap-3 mb-4">
+                 <div className="p-2 bg-blue-600 rounded-xl">
+                     <Activity className="w-4 h-4 text-white" />
                  </div>
                  <div>
                     <p className="text-[8px] uppercase tracking-widest text-slate-500 font-bold">{tHero('telemetryFeed')}</p>
                     <p className="text-xs text-slate-900 font-bold tracking-tight">{tHero('activeScan')}</p>
                  </div>
              </div>
-             <div className="h-10 w-full flex items-end gap-[3px]">
+             <div className="h-10 w-full flex items-end gap-[3px] mb-3">
                  {[35, 50, 25, 75, 40, 85, 30, 65, 45, 70, 50, 80, 55, 75, 40].map((h, i) => (
                      <div key={i} className="bg-gradient-to-t from-blue-500 to-indigo-400 rounded-full flex-grow" style={{height: `${h}%`, opacity: i % 2 === 0 ? 0.5 : 1}} />
                  ))}
+             </div>
+             <div className="flex items-center justify-between text-[8px] font-bold uppercase tracking-widest">
+               <span className="text-slate-400">Bodrum · Kalkan · Fethiye</span>
+               <span className="text-emerald-600 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />Live</span>
              </div>
           </div>
 
@@ -506,7 +623,7 @@ export default function UltimateLuxuryBento() {
               </div>
               <div>
                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mb-1.5">{tHero('processing')}</p>
-                  <p className="text-sm font-black text-white leading-none">Vercel Edge</p>
+                  <p className="text-sm font-black text-white leading-none">Aegean Region</p>
               </div>
           </div>
         </div>
@@ -521,7 +638,7 @@ export default function UltimateLuxuryBento() {
             <p className="text-slate-500 font-light max-w-xl text-lg">{tMethod('sectionSubtitle')}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-8 h-auto md:h-[650px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-8 h-auto md:h-[780px]">
 
             {/* Box 1: Core Analytics */}
             <div className="md:col-span-1 md:row-span-2 relative rounded-[2.5rem] overflow-hidden border border-slate-200 shadow-[0_10px_30px_rgba(0,0,0,0.04)] group cursor-pointer bg-slate-900 transition-shadow duration-700 hover:shadow-[0_30px_60px_rgba(0,0,0,0.15)]">
@@ -545,67 +662,152 @@ export default function UltimateLuxuryBento() {
                 </div>
             </div>
 
-            {/* Box 2: Seismic Resonance */}
+            {/* Box 2: Seismic Hazard Analysis — seismograph redesign */}
             <div className="md:col-span-2 md:row-span-1 bg-white rounded-[2.5rem] border border-slate-200 p-8 md:p-10 relative overflow-hidden group shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition-shadow duration-700 hover:shadow-[0_30px_60px_rgba(37,99,235,0.08)]">
-                <img
-                  src="https://images.unsplash.com/photo-1580193769210-b8d1c049a7d9?auto=format&fit=crop&q=80&w=1200"
-                  alt="Earth Strata"
-                  className="absolute inset-0 w-full h-full object-cover opacity-[0.10] group-hover:opacity-[0.15] transition-opacity duration-1000 z-0 pointer-events-none mix-blend-multiply grayscale"
-                />
-                <div className="flex flex-col md:flex-row justify-between gap-10 relative z-10 h-full">
-                    <div className="flex flex-col justify-center max-w-sm">
-                        <div className="flex items-center gap-4 mb-5">
-                            <div className="p-2.5 bg-white border border-slate-200 rounded-xl relative overflow-hidden">
-                                <Zap className="w-5 h-5 text-blue-600 relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-white pointer-events-none" />
+                <div className="flex flex-col md:flex-row justify-between gap-8 relative z-10 h-full">
+
+                    {/* Left: text */}
+                    <div className="flex flex-col justify-center max-w-[260px] shrink-0">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-xl">
+                                <Zap className="w-5 h-5 text-blue-600" />
                             </div>
-                            <span className="text-[9px] font-black text-blue-600/70 uppercase tracking-[0.3em]">{tMethod('seismicTag')}</span>
+                            <span className="text-[9px] font-black text-blue-600/80 uppercase tracking-[0.3em]">{tMethod('seismicTag')}</span>
                         </div>
                         <h3 className="text-2xl font-bold text-slate-900 mb-3">{tMethod('box2Title')}</h3>
-                        <p className="text-sm text-slate-600 font-light leading-relaxed font-medium">{tMethod('box2Desc')}</p>
+                        <p className="text-sm text-slate-500 font-light leading-relaxed">{tMethod('box2Desc')}</p>
+                        <div className="flex flex-wrap gap-2 mt-6">
+                            <span className="px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-full text-[8px] font-mono text-blue-700 font-bold">Mw 7.5 Simulation</span>
+                            <span className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-[8px] font-mono text-slate-600 font-bold">TBDY 2018 Zone 1</span>
+                        </div>
                     </div>
-                    <div className="flex-grow bg-slate-50/80 backdrop-blur-md rounded-[2rem] border border-slate-200 p-4 flex items-center justify-center relative overflow-hidden">
-                        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] z-0 pointer-events-none" />
-                        <Radar className="w-32 h-32 text-blue-600/20 absolute animate-[spin_6s_linear_infinite] z-10" />
-                        <Crosshair className="w-8 h-8 text-blue-600 relative z-10" />
-                        <div className="absolute right-4 bottom-4 bg-white/95 backdrop-blur-md px-4 py-2 rounded-full text-[9px] font-mono text-blue-600 uppercase tracking-widest border border-slate-200 shadow-sm flex items-center gap-2 z-10">
-                           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                           {tMethod('ec8Protocol')}
+
+                    {/* Right: seismograph panel */}
+                    <div className="flex-grow bg-slate-50 rounded-[2rem] border border-slate-100 p-5 flex flex-col justify-between min-h-[160px] overflow-hidden">
+                        <div className="flex justify-between items-center mb-2">
+                            <p className="text-[8px] font-mono text-slate-400 uppercase tracking-widest">Ground Motion Record · EC8</p>
+                            <div className="px-2.5 py-1 bg-white rounded-full border border-slate-200 text-[8px] font-mono text-blue-600 flex items-center gap-1.5 shadow-sm">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                {tMethod('ec8Protocol')}
+                            </div>
+                        </div>
+
+                        {/* Seismograph waveform */}
+                        <div className="flex-1 flex items-center py-1">
+                            <svg viewBox="0 0 400 72" className="w-full" preserveAspectRatio="none">
+                                {/* horizontal grid */}
+                                <line x1="0" y1="36" x2="400" y2="36" stroke="#e2e8f0" strokeWidth="1"/>
+                                <line x1="0" y1="18" x2="400" y2="18" stroke="#f1f5f9" strokeWidth="0.75" strokeDasharray="4 4"/>
+                                <line x1="0" y1="54" x2="400" y2="54" stroke="#f1f5f9" strokeWidth="0.75" strokeDasharray="4 4"/>
+                                {/* pre-event flat trace */}
+                                <polyline points="0,36 30,36 34,35 38,37 42,36" fill="none" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round"/>
+                                {/* P-wave arrival */}
+                                <line x1="48" y1="10" x2="48" y2="66" stroke="#cbd5e1" strokeWidth="0.75" strokeDasharray="2 3"/>
+                                <text x="50" y="14" fill="#94a3b8" fontSize="5.5" fontFamily="monospace">P</text>
+                                {/* S-wave arrival */}
+                                <line x1="88" y1="10" x2="88" y2="66" stroke="#fca5a5" strokeWidth="0.75" strokeDasharray="2 3"/>
+                                <text x="90" y="14" fill="#f87171" fontSize="5.5" fontFamily="monospace">S</text>
+                                {/* P-wave small wiggles */}
+                                <polyline points="42,36 48,36 52,33 56,39 60,34 64,38 68,35 72,37 76,34 80,38 84,36 88,36" fill="none" stroke="#60a5fa" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                                {/* S-wave main event */}
+                                <polyline points="88,36 92,30 96,18 100,6 104,2 108,10 112,24 116,48 120,62 124,66 128,58 132,44 136,34 140,38 144,33 148,39 152,35 156,37 160,36" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                {/* peak annotation dot */}
+                                <circle cx="104" cy="2" r="2.5" fill="#ef4444"/>
+                                <text x="108" y="7" fill="#ef4444" fontSize="5.5" fontFamily="monospace" fontWeight="bold">PGA 0.38g</text>
+                                {/* coda / post-event settle */}
+                                <polyline points="160,36 168,34 174,38 180,36 190,36 200,35 210,37 220,36 260,36 280,36 400,36" fill="none" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round"/>
+                            </svg>
+                        </div>
+
+                        {/* bottom metrics */}
+                        <div className="grid grid-cols-4 gap-2 pt-3 border-t border-slate-200 mt-1">
+                            <div className="text-center">
+                                <p className="text-[7px] font-mono text-slate-400 uppercase tracking-widest mb-0.5">Magnitude</p>
+                                <p className="text-xs font-black text-slate-900">Mw 7.5</p>
+                            </div>
+                            <div className="text-center border-x border-slate-200">
+                                <p className="text-[7px] font-mono text-slate-400 uppercase tracking-widest mb-0.5">PGA</p>
+                                <p className="text-xs font-black text-blue-600">0.38g</p>
+                            </div>
+                            <div className="text-center border-r border-slate-200">
+                                <p className="text-[7px] font-mono text-slate-400 uppercase tracking-widest mb-0.5">Duration</p>
+                                <p className="text-xs font-black text-slate-900">42s</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-[7px] font-mono text-slate-400 uppercase tracking-widest mb-0.5">Return Pd.</p>
+                                <p className="text-xs font-black text-slate-900">475 yr</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Box 3: Immutable Ledger */}
-            <div className="md:col-span-1 md:row-span-1 bg-white rounded-[2.5rem] border border-blue-100 p-8 flex flex-col justify-between shadow-[0_10px_30px_rgba(0,0,0,0.04)] relative overflow-hidden group transition-shadow duration-700 hover:shadow-[0_30px_60px_rgba(37,99,235,0.1)]">
-                <div className="absolute -right-8 -top-8 w-56 h-56 rounded-full bg-[radial-gradient(circle_at_30%_30%,_#93c5fd,_#2563eb)] opacity-70 transition-transform duration-1000 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-white/50 backdrop-blur-[24px] z-0 pointer-events-none" />
-                <div className="flex justify-between items-start relative z-10">
-                    <div className="p-3 bg-white/90 backdrop-blur-md rounded-2xl w-fit border border-slate-100 shadow-sm">
-                        <Binary className="w-6 h-6 text-blue-600" />
+            {/* Box 3: Tamper-Proof Delivery — dark certificate card */}
+            <div className="md:col-span-1 md:row-span-1 bg-[#0A0F1C] rounded-[2.5rem] border border-slate-800 p-7 flex flex-col justify-between shadow-[0_10px_30px_rgba(0,0,0,0.18)] relative overflow-hidden group transition-shadow duration-700 hover:shadow-[0_30px_60px_rgba(37,99,235,0.18)]">
+                {/* ambient glows */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-blue-600/10 rounded-full blur-[60px] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/8 rounded-full blur-[50px] pointer-events-none" />
+
+                {/* top label + live badge */}
+                <div className="flex items-center justify-between relative z-10">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.35em]">Phase 03 · Delivery</p>
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-mono text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        LIVE
+                    </span>
+                </div>
+
+                {/* central seal */}
+                <div className="flex flex-col items-center justify-center py-3 relative z-10">
+                    <div className="relative mb-3">
+                        <div className="w-20 h-20 rounded-full border-2 border-emerald-500/30 flex items-center justify-center">
+                            <div className="w-14 h-14 rounded-full border border-emerald-500/50 bg-emerald-500/10 flex items-center justify-center shadow-[0_0_24px_rgba(16,185,129,0.2)]">
+                                <ShieldCheck className="w-7 h-7 text-emerald-400" />
+                            </div>
+                        </div>
+                        <svg className="absolute inset-0 w-20 h-20 animate-[spin_8s_linear_infinite]" viewBox="0 0 80 80">
+                            <circle cx="40" cy="40" r="38" fill="none" stroke="rgba(16,185,129,0.25)" strokeWidth="1" strokeDasharray="4 8" />
+                        </svg>
                     </div>
-                    <div className="px-3 py-1.5 bg-blue-50 rounded-full border border-blue-100 text-[8px] font-mono text-blue-700 flex items-center gap-2 shadow-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                        {tMethod('nodeSynced')}
+                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.4em] mb-0.5">{tMethod('verified')}</p>
+                    <p className="text-[8px] font-mono text-slate-500 tracking-widest">{tMethod('calibrationValue')}</p>
+                </div>
+
+                {/* certificate data rows */}
+                <div className="bg-white/[0.04] border border-white/[0.07] rounded-2xl p-3 space-y-2.5 relative z-10">
+                    <div className="flex justify-between items-center">
+                        <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Report ID</span>
+                        <span className="text-[8px] font-mono text-blue-400">AUR-2026-047</span>
+                    </div>
+                    <div className="w-full h-px bg-white/[0.06]" />
+                    <div className="flex justify-between items-center">
+                        <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Standard</span>
+                        <span className="text-[8px] font-mono text-slate-300">EC8 · TBDY 2018</span>
+                    </div>
+                    <div className="w-full h-px bg-white/[0.06]" />
+                    <div className="flex justify-between items-center">
+                        <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">Encryption</span>
+                        <span className="text-[8px] font-mono text-slate-300">AES-256</span>
+                    </div>
+                    <div className="w-full h-px bg-white/[0.06]" />
+                    <div className="flex items-center gap-2">
+                        <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest shrink-0">Hash</span>
+                        <span className="text-[8px] font-mono text-blue-400 truncate">{tMethod('hashText')}</span>
                     </div>
                 </div>
-                <div className="relative z-10 mt-4">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">{tMethod('box3Title')}</h3>
-                    <p className="text-xs text-slate-500 font-light leading-relaxed mb-5">
-                        {tMethod('box3Desc')}
-                    </p>
-                    <div className="bg-slate-50 rounded-xl p-3 mb-5 border border-slate-100 space-y-1.5 shadow-inner">
-                        <div className="flex justify-between text-[8px] font-mono text-slate-500">
-                            <span>{tMethod('block')}</span>
-                            <span className="text-blue-600 font-bold">{tMethod('verified')}</span>
-                        </div>
-                        <div className="text-[8px] font-mono text-slate-400 truncate">
-                            {tMethod('hashText')}
-                        </div>
+
+                {/* footer PIN hint */}
+                <div className="flex items-center gap-3 mt-1 relative z-10">
+                    <div className="flex items-center gap-1">
+                        {[0,1,2,3].map(i => (
+                            <div key={i} className="w-5 h-7 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-slate-400 text-sm">·</div>
+                        ))}
                     </div>
-                    <button className="w-full py-3.5 px-4 bg-slate-900 hover:bg-blue-600 rounded-xl border border-transparent text-white text-[9px] font-bold uppercase tracking-[0.2em] transition-colors flex items-center justify-between group/btn shadow-md">
-                        {tMethod('verifyCert')}
-                        <ArrowRight className="w-3.5 h-3.5 text-blue-300" />
-                    </button>
+                    <div>
+                        <p className="text-[9px] font-bold text-white uppercase tracking-[0.2em] leading-none mb-0.5">{tMethod('box3Title')}</p>
+                        <p className="text-[8px] text-slate-500 font-light">{tMethod('nodeSynced')}</p>
+                    </div>
                 </div>
             </div>
 
@@ -620,7 +822,7 @@ export default function UltimateLuxuryBento() {
                         <ShieldAlert className="w-4 h-4 text-blue-600" />
                         <p className="text-[9px] font-black text-blue-600 uppercase tracking-[0.3em]">{tMethod('precisionMetric')}</p>
                     </div>
-                    <p className="text-6xl font-black text-slate-900 mb-2 tracking-tighter">99.9<span className="text-3xl text-slate-400">%</span></p>
+                    <p className="text-6xl font-black text-slate-900 mb-1 tracking-tighter">14<span className="text-2xl text-slate-400 ml-1">days</span></p>
                     <p className="text-xs text-blue-700/60 uppercase tracking-widest font-semibold flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> {tMethod('accuracyLabel')}
                     </p>
@@ -644,7 +846,7 @@ export default function UltimateLuxuryBento() {
         <div className="max-w-[1600px] mx-auto px-6 md:px-12">
             <div className="grid lg:grid-cols-12 gap-16 items-start">
 
-                <div className="lg:col-span-5 flex flex-col items-start sticky top-32">
+                <div className="lg:col-span-5 flex flex-col items-start sticky top-12 md:top-32">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-[9px] font-bold tracking-[0.2em] text-slate-500 uppercase mb-8 shadow-sm">
                         {tValue('badge')}
                     </div>
@@ -707,9 +909,9 @@ export default function UltimateLuxuryBento() {
                                 </li>
                             ))}
                         </ul>
-                        <button className="w-full py-5 bg-blue-600 hover:bg-blue-500 rounded-[2rem] text-white text-[10px] font-bold uppercase tracking-[0.2em] transition-colors shadow-inner flex items-center justify-center gap-3">
+                        <Link href={`/${locale}/engage`} className="w-full py-5 bg-blue-600 hover:bg-blue-500 rounded-[2rem] text-white text-[10px] font-bold uppercase tracking-[0.2em] transition-colors shadow-inner flex items-center justify-center gap-3">
                             {tPrice('ctaButton')} <Play className="w-3.5 h-3.5 fill-white" />
-                        </button>
+                        </Link>
                     </div>
                 </div>
 
@@ -834,11 +1036,12 @@ export default function UltimateLuxuryBento() {
              </div>
           </div>
           <div className="flex flex-wrap gap-8 text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-             <a href="#" className="hover:text-blue-600 transition-colors">{tFooter('aboutUs')}</a>
-             <a href="#" className="hover:text-blue-600 transition-colors">{tFooter('pricing')}</a>
-             <a href="#" className="hover:text-blue-600 transition-colors">{tFooter('kvkk')}</a>
-             <a href="#" className="hover:text-blue-600 transition-colors">{tFooter('privacy')}</a>
-             <a href="#" className="hover:text-blue-600 transition-colors">{tFooter('systemStatus')}</a>
+             <Link href={`/${locale}/about`} className="hover:text-blue-600 transition-colors">{tFooter('aboutUs')}</Link>
+             <Link href={`/${locale}/projects`} className="hover:text-blue-600 transition-colors">{tFooter('projects')}</Link>
+             <Link href={`/${locale}/procedures`} className="hover:text-blue-600 transition-colors">{tFooter('procedures')}</Link>
+             <Link href={`/${locale}/contact`} className="hover:text-blue-600 transition-colors">{tFooter('contact')}</Link>
+             <Link href={`/${locale}/kvkk`}    className="hover:text-blue-600 transition-colors">{tFooter('kvkk')}</Link>
+             <Link href={`/${locale}/privacy`} className="hover:text-blue-600 transition-colors">{tFooter('privacy')}</Link>
           </div>
         </div>
       </footer>

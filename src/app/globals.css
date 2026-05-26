@@ -32,6 +32,12 @@
       transform: translateY(0);
     }
   }
+
+  /* Ticker / marquee strip — defined globally so it runs on first page load */
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 }
 
 /* 3. Base Document Element Styles */
