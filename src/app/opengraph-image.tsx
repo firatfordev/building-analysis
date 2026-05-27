@@ -79,8 +79,11 @@ export default function OGImage() {
             <div style={{ color: '#fff', fontSize: 28, fontWeight: 900, lineHeight: 1 }}>A</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            
+            {/* FIXED: Satori Text Trap (Converted to Flex) */}
             <div
               style={{
+                display: 'flex',
                 color: '#ffffff',
                 fontSize: 14,
                 fontWeight: 700,
@@ -89,8 +92,10 @@ export default function OGImage() {
                 fontFamily: 'Arial, sans-serif',
               }}
             >
-              AURA <span style={{ color: '#60a5fa', fontWeight: 300 }}>ANALYTICS</span>
+              <div style={{ marginRight: 8 }}>AURA</div>
+              <div style={{ color: '#60a5fa', fontWeight: 300 }}>ANALYTICS</div>
             </div>
+
             <div
               style={{
                 color: '#475569',
@@ -120,8 +125,12 @@ export default function OGImage() {
           >
             Certified Structural Analysis · Aegean Region, Turkey
           </div>
+          
+          {/* FIXED: Satori Text Trap (Converted to Flex) */}
           <div
             style={{
+              display: 'flex',
+              flexWrap: 'wrap',
               color: '#ffffff',
               fontSize: 68,
               fontWeight: 700,
@@ -129,8 +138,8 @@ export default function OGImage() {
               letterSpacing: '-2px',
             }}
           >
-            Know Your Building.{' '}
-            <span
+            <div style={{ marginRight: 16 }}>Know Your Building.</div>
+            <div
               style={{
                 color: 'transparent',
                 backgroundImage: 'linear-gradient(90deg, #60a5fa, #818cf8, #a78bfa)',
@@ -140,8 +149,9 @@ export default function OGImage() {
               }}
             >
               Certified.
-            </span>
+            </div>
           </div>
+
           <div
             style={{
               color: '#64748b',
