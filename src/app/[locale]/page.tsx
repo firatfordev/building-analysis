@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import {
   Search, Lock, ArrowRight, Activity, ShieldCheck,
   Fingerprint, MapPin,
@@ -35,8 +35,11 @@ type UnlockedBuilding = {
 };
 
 export default function UltimateLuxuryBento() {
-  const params = useParams();
-  const locale = (params.locale as string) ?? 'en';
+  const params      = useParams();
+  const locale      = (params.locale as string) ?? 'tr';
+  const pathname    = usePathname();
+  const otherLocale  = locale === 'tr' ? 'en' : 'tr';
+  const switchedPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
   // ── Auth check: skip login if already authenticated ──────────────────────────
   const [adminHref, setAdminHref] = useState(`/${locale}/admin/login`);
@@ -253,21 +256,38 @@ export default function UltimateLuxuryBento() {
               <Link href={`/${locale}/projects`}   className="hover:text-blue-600 transition-colors">{tHeader('projects')}</Link>
               <Link href={`/${locale}/procedures`} className="hover:text-blue-600 transition-colors">{tHeader('procedures')}</Link>
               <Link href={`/${locale}/contact`}    className="hover:text-blue-600 transition-colors">{tHeader('contact')}</Link>
+              <Link
+                href={switchedPath}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-transparent hover:border-slate-200 text-[9px] font-bold uppercase tracking-[0.2em] transition-all"
+              >
+                <Globe className="w-3 h-3" />
+                {otherLocale.toUpperCase()}
+              </Link>
+              <div className="w-px h-4 bg-slate-200" />
               <Link href={adminHref} className="bg-slate-900 text-white px-8 py-3.5 rounded-full hover:bg-blue-700 transition-colors duration-300 text-[10px] font-bold uppercase tracking-widest shadow-md ml-2">
                 {tHeader('adminPortal')}
               </Link>
             </nav>
 
-            {/* Mobile hamburger (below lg) */}
-            <button
-              type="button"
-              onClick={() => setMobileOpen(v => !v)}
-              aria-expanded={mobileOpen}
-              aria-label="Toggle menu"
-              className="flex lg:hidden items-center justify-center w-10 h-10 rounded-xl bg-slate-900 text-white hover:bg-blue-700 active:scale-95 transition-all shrink-0"
-            >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            {/* Mobile right: locale + hamburger (below lg) */}
+            <div className="flex items-center gap-2 lg:hidden shrink-0">
+              <Link
+                href={switchedPath}
+                className="flex items-center gap-1 px-2.5 py-2 rounded-lg border border-slate-200 text-slate-500 text-[9px] font-bold uppercase tracking-[0.15em] hover:bg-slate-50 transition-colors"
+              >
+                <Globe className="w-3 h-3" />
+                {otherLocale.toUpperCase()}
+              </Link>
+              <button
+                type="button"
+                onClick={() => setMobileOpen(v => !v)}
+                aria-expanded={mobileOpen}
+                aria-label="Toggle menu"
+                className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900 text-white hover:bg-blue-700 active:scale-95 transition-all shrink-0"
+              >
+                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
 
           </div>
 
@@ -554,7 +574,7 @@ export default function UltimateLuxuryBento() {
                       value={searchTerm}
                       onChange={e => { setSearchTerm(e.target.value); setSearchError(null); }}
                       className="w-full pl-16 pr-5 py-5 bg-slate-50/50 border border-slate-100 text-slate-900 text-sm tracking-widest placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-200 transition-all duration-300 rounded-[2rem] uppercase"
-                      autoFocus
+                      
                     />
                   </div>
                   <button
