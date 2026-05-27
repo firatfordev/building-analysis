@@ -57,6 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const altLang    = isTR ? 'en' : 'tr';
 
   return {
+    metadataBase: new URL(SITE_URL), // Add this back so Next.js formats URLs perfectly
     title: {
       default:  title,
       template: `%s | AURA Analytics`,
@@ -71,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         // x-default points to root (no locale prefix); middleware redirects
         // to the user's preferred language, keeping it distinct from both
         // hreflang[en] and hreflang[tr] so canonical never equals x-default.
-        'x-default': SITE_URL,
+        'x-default': `${SITE_URL}/tr`,
       },
     },
     openGraph: {
