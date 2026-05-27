@@ -52,8 +52,12 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: '/icon', type: 'image/png', sizes: '32x32' }],
-    apple: [{ url: '/apple-icon', type: 'image/png', sizes: '180x180' }],
+    icon: [
+      { url: '/favicon.ico',  type: 'image/x-icon', sizes: 'any' },
+      { url: '/icon.png',     type: 'image/png',     sizes: '32x32' },
+      { url: '/icon-192.png', type: 'image/png',     sizes: '192x192' },
+    ],
+    apple:   [{ url: '/apple-icon.png', type: 'image/png', sizes: '180x180' }],
     shortcut: '/favicon.ico',
   },
   manifest: '/site.webmanifest',
