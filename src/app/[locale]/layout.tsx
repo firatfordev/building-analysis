@@ -4,7 +4,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://aura.systems';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://building-analysis.vercel.app';
 
 type Props = {
   children: React.ReactNode;
