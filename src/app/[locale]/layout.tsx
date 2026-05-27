@@ -68,7 +68,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       languages: {
         en:          `${SITE_URL}/en`,
         tr:          `${SITE_URL}/tr`,
-        'x-default': `${SITE_URL}/en`,
+        // x-default points to root (no locale prefix); middleware redirects
+        // to the user's preferred language, keeping it distinct from both
+        // hreflang[en] and hreflang[tr] so canonical never equals x-default.
+        'x-default': SITE_URL,
       },
     },
     openGraph: {
