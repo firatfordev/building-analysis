@@ -79,6 +79,7 @@ export default function UltimateLuxuryBento() {
   const [verifying,        setVerifying]        = useState(false);
   const [pinError,         setPinError]         = useState<string | null>(null);
   const [unlockedBuilding, setUnlockedBuilding] = useState<UnlockedBuilding | null>(null);
+  const [reportHash,       setReportHash]       = useState<string | null>(null);
 
   // ── Search handler ────────────────────────────────────────────────────────────
   const handleSearch = async (e: React.FormEvent) => {
@@ -131,6 +132,14 @@ export default function UltimateLuxuryBento() {
         );
         return;
       }
+      // Compute SHA-256(buildingId:pin) for the shareable report URL fragment
+      const msgBuffer  = new TextEncoder().encode(`${selectedBuilding.id}:${pin}`);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashHex    = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      setReportHash(hashHex);
+
       setUnlockedBuilding(json.building);
       setStep('unlocked');
     } catch {
@@ -145,6 +154,7 @@ export default function UltimateLuxuryBento() {
     setSelectedBuilding(null); setPin(''); setPinError(null);
     setSearchError(null); setUnlockedBuilding(null);
     setIsSample(false); setSampleError(null);
+    setReportHash(null);
   };
 
   // ── Sample demo handler ───────────────────────────────────────────────────
@@ -406,20 +416,16 @@ export default function UltimateLuxuryBento() {
                 <div className="flex gap-2 flex-wrap items-center">
                   {unlockedBuilding.pdfUrl ? (
                     <>
+                      {/* Real building → inline report page with hash; sample → sample report page */}
                       <a
-                        href={unlockedBuilding.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={
+                          !isSample && reportHash
+                            ? `/${locale}/reports/${unlockedBuilding.id}/report#${reportHash}`
+                            : `/${locale}/reports/sample/report`
+                        }
                         className="flex-1 min-w-0 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-widest text-[10px] py-4 rounded-[2rem] uppercase shadow-[0_8px_16px_rgba(37,99,235,0.2)] transition-all"
                       >
                         <FileText className="h-3.5 w-3.5" /> {tSearch('viewReport')}
-                      </a>
-                      <a
-                        href={unlockedBuilding.pdfUrl}
-                        download
-                        className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold tracking-widest text-[10px] px-6 py-4 rounded-[2rem] uppercase transition-colors"
-                      >
-                        <Download className="h-3.5 w-3.5" /> {tSearch('pdf')}
                       </a>
                     </>
                   ) : (
